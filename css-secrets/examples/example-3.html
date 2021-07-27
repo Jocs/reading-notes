@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>灵活的背景定位</title>
+	<style>
+		div {
+			width: 200px;
+			height: 200px;
+			margin: 100px 50px 0 0;
+			display: inline-block;
+		}
+		.first {
+			background: url("./images/example-02.png") no-repeat #58a;
+			background-position: right 20px bottom 10px;
+		}
+		.second {
+			background: url("./images/example-02.png") no-repeat #58a;
+			background-origin: content-box;
+			background-position: right bottom;
+			padding: 10px 20px;
+			box-sizing: border-box;
+		}
+		.third {
+			background: url("./images/example-02.png") no-repeat #58a;
+			background-position: calc(100% - 20px) calc(100% - 10px);
+		}
+	</style>
+</head>
+<body>
+	<div class="first"></div>
+	<div class="second"></div>
+	<div class="third"></div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>条纹背景</title>
+	<style>
+		div {
+			display: inline-block;
+			width: 200px;
+			height: 200px;
+			margin-right: 50px;
+		}
+		.h {
+			background: linear-gradient(#fb3 33.33%, #58a 0, #58a 66.67%, yellowgreen 0);
+			background-size: 100% 30px;
+		}
+		.v {
+			background: linear-gradient(to right, #fb3 33.33%, #58a 0, #58a 66.67%, yellowgreen 0);
+			background-size: 30px 100%;
+		}
+		.i {
+			background: linear-gradient(45deg, #fb3 25%, #58a 0, #58a 50%, #fb3 0, #fb3 75%, #58a 0);
+			background-size: 30px 30px;
+		}
+		.bi {
+			background: repeating-linear-gradient(60deg, #fb3, #fb3 15px, #58a 0, #58a 30px);
+		}
+	</style>
+</head>
+<body>
+	<div class="h"></div>
+	<div class="v"></div>
+	<div class="i"></div>
+	<div class="bi"></div>
+</body>
+</html>

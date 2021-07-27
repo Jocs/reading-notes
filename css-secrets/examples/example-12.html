@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>切角效果</title>
+	<style>
+		div {
+			width: 200px;
+			height: 100px;
+		}
+		.first {
+			background: linear-gradient(135deg, transparent 15px, #558 0) top left,
+				linear-gradient(-135deg, transparent 15px, #558 0) top right,
+				linear-gradient(-45deg, transparent 15px, #558 0) bottom right,
+				linear-gradient(45deg, transparent 15px, #558 0) bottom left;
+			background-size: 50% 50%;
+			background-repeat: no-repeat;
+		}
+		.second {
+			background: radial-gradient(circle at top left, transparent 15px, #558 0) top left,
+				radial-gradient(circle at top right, transparent 15px, #558 0) top right,
+				radial-gradient(circle at bottom right, transparent 15px, #558 0) bottom right,
+				radial-gradient(circle at bottom left, transparent 15px, #558 0) bottom left;
+			background-size: 50% 50%;
+			background-repeat: no-repeat;
+		}
+	</style>
+</head>
+<body>
+	<h4>直边切角</h4>
+	<div class="first"></div>
+	<h4>弧边切角</h4>
+	<div class="second"></div>
+</body>
+</html>
