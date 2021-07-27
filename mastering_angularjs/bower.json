@@ -1,0 +1,26 @@
+{
+  "name": "temp",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "罗冉 <luoran1988@126.com>"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.7",
+    "angular-mocks": "~1.4.7",
+    "angular-resource": "~1.4.7",
+    "bootstrap": "~3.3.5",
+    "angular-animate": "~1.4.7",
+    "jquery-ui": "~1.11.4"
+  }
+}

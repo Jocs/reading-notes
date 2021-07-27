@@ -1,0 +1,29 @@
+<!doctype html>
+<html ng-app>
+<head>
+  <meta charset="utf-8">
+  <title>Chapter 8 - shared subforms</title>
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>document.write("<base href=\"" + document.location + "\" />");</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
+  <script src="app.js"></script>
+</head>
+
+<body>
+<script type="text/ng-template" id="password-form">
+  <ng-form name="passwordForm">
+    <div ng-show="user.password != user.password2">Passwords do not match</div>
+    <label>Password</label><input ng-model="user.password" type="password" required>
+    <label>Confirm Password</label><input ng-model="user.password2" type="password" required>
+  </ng-form>
+</script>
+
+<form name="form1" novalidate>
+  <legend>User Form</legend>
+  <label>Name</label><input ng-model="user.name" required>
+  <ng-include src="'password-form'"></ng-include>
+</form>
+
+</body>
+</html>

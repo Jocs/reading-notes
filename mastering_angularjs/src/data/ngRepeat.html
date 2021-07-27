@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app2">
+<head>
+	<meta charset="UTF-8">
+	<title>ng-repeat</title>
+	<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
+	<link rel="stylesheet" href="ngRepeat.css">
+</head>
+<body ng-controller="MainController" >
+<!-- <h4>ng-repeat的用法</h4>
+	<table class="table table-striped table-bordered">
+		<tbody ng-repeat="user in users" 
+		ng-click="toggleSelected()" 
+		ng-switch on='isSelected'
+		ng-controller="UserController">
+			<tr ng-class="{info: isSelected}">
+				<td>{{user.name}}</td>
+				<td>{{user.email}}</td>
+			</tr>
+			<tr ng-switch-when="true" ng-class="{info: isSelected}">
+				<td colspan='2'>{{user.desc}}</td>
+			</tr>
+		</tbody>
+	</table> -->
+	<!-- <h4>ng-repeat-start && ng-repeat-end的用法</h4>
+	<ul>
+		<li ng-repeat-start="user in users">{{user.name}}</li>
+		<li>{{user.email}}</li>
+		<li ng-repeat-end>{{user.desc}}</li>
+	</ul> -->
+	<!-- <h4>过滤器的使用:json</h4>
+	<pre><code>{{users | json}}</code></pre> -->
+	<h4>过滤器的使用：orderBy和filter</h4>
+	<h5>FilterWord: {{filterWord}}</h5>
+	<input type="text" class='form-control' ng-model='filterWord' 
+	ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 350, 'blur': 0 } }">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<td ng-click="sort('name')" id='orderByName'>
+					Name&nbsp;
+					<span ng-class="{'glyphicon glyphicon-menu-up': isSortUp('name'), 'glyphicon glyphicon-menu-down': isSortDown('name')}"></span>
+				</td>
+				<td ng-click="sort('email')" id='orderByEmail'>
+					Email&nbsp;
+					<span ng-class="{'glyphicon glyphicon-menu-up': isSortUp('email'), 'glyphicon glyphicon-menu-down': isSortDown('email')}">
+				</td>
+				<td>Description</td>
+			</tr>
+		</thead>
+		<tbody id='tableBody'>
+			<tr ng-repeat="user in filterUsers" class='fade-in'>
+				<td>{{user.name}}</td>
+				<td>{{user.email}}</td>
+				<td>{{user.desc}}</td>
+			</tr>
+		</tbody>
+	</table>
+	<p class='bg bg-success'>Total:{{filterUsers.length}}</p>
+	<div screenshots></div>
+
+	<script src='../bower_components/angular/angular.js'></script>
+	<script src='../bower_components/angular-animate/angular-animate.js'></script>
+	<script src='../bower_components/html2canvas.js'></script>
+	<script src='ngRepeat.js'></script>
+	<script src='ngRepeat.directive.js'></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

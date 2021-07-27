@@ -1,0 +1,13 @@
+<div class='pagination'>
+	<ul class="pagination">
+		<li ng-class='{disabled: noPrivious()}'>
+			<a href="" ng-click="selectPrivious()">Previous</a>
+		</li>
+		<li ng-repeat="page in pages" ng-class="{active: isActive(page)}">
+			<a href="" ng-click="selectPage(page)">{{page}}</a>
+		</li>
+		<li ng-class='{disabled: noNext()}'>
+			<a href="" ng-click="selectNext()">Next</a>
+		</li>
+	</ul>
+</div>
