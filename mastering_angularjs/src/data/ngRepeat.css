@@ -1,0 +1,14 @@
+@-webkit-keyframes animationView-enter {
+	from{opacity: 0;}
+	to{opacity: 1;}
+}
+@-webkit-keyframes animationView-leave {
+	from{opacity: 1;}
+	to{opacity: 0;}
+}
+.fade-in.ng-enter {
+	-webkit-animation: 0.5s animationView-enter ;
+}
+.fade-in.ng-leave {
+	-webkit-animation: 0.5s animationView-leave ;
+}

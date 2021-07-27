@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" ng-app = "accrodion">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.css">
+</head>
+<body ng-controller="MainController">
+	<accordion class='list-group'>
+		<accordion-group ng-repeat="user in users" heading='user.name'>
+			Some Basic infomation of this gay: {{ user.message }}
+		</accordion-group>
+	</accordion>	
+
+	<script src='../../bower_components/angular/angular.js'></script>
+	<script src='directive.js'></script>
+</body>
+</html>

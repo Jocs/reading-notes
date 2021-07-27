@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="pageApp">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.css">
+</head>
+<body ng-controller='PageController'>
+	<div>current page:{{currentPage}}</div>
+	<input type="number" ng-model='numPages' class='form-control'>
+
+	<pagination num-pages='numPages' 
+	current-page='currentPage'
+	on-select-page = 'selectPage(page)'>
+	</pagination>
+
+	<script src='../../bower_components/angular/angular.js'></script>
+	<script src='directive.js'></script>
+</body>
+</html>

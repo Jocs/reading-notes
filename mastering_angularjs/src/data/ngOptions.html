@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ngOptions">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	
+</head>
+<body ng-controller="MainController">
+	<select ng-options="item.name group by item.age for item in iterms" ng-model='selected'></select>
+	<pre>{{selected | json}}</pre>
+	
+	<form action="" novalidate>
+		<legend>User Form</legend>
+		<label for="">Name</label>
+		<input type="text" ng-model='user.name' required>
+		<ng-include src="'password-form'"></ng-include>	
+	</form>
+
+	<script src='../bower_components/angular/angular.js'></script>
+
+	<script src='ngOptions.js'></script>
+	<script type='text/ng-template' id='password-form'>
+		<ng-form name='passwordForm'>
+			<div ng-show='user.password != user.password2'>
+				Password do not match!
+			</div>
+			<label>Password</label>
+			<input type='password' ng-model='password' required>
+			<label>Confirm password</label>
+			<input ng-model='user.password2' required type='password' >
+		</ng-form>
+	</script>
+</body>
+</html>

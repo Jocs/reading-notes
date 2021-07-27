@@ -1,0 +1,8 @@
+<div class='list-group-item' ng-class='{active: isOpened}'>
+	<div >
+		<a href="" ng-click="open()">{{heading}}</a>
+	</div>
+	<div  ng-show='isOpened'>
+		<div ng-transclude></div>
+	</div>
+</div>

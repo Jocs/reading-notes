@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='tran'>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body ng-controller="MainController">
+	<button ng-click="model.show = !model.show">Toggle Div</button>
+	<div if='model.show' ng-init = 'model.count = model.count + 1'>
+		Shown {{model.count}} times;
+	</div>
+
+	<script src='../../bower_components/angular/angular.js'></script>
+	<script src='directive.js'></script>
+</body>
+</html>

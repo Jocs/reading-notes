@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="validation">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<form action="" name='passwordForm'>
+		<input type="password" ng-model='model.password1' name='password1'>
+		<input type="password" ng-model='password2' validate-equal = 'model.password1' name='password2'>
+		<div ng-show='passwordForm.password2.$error["equal"]'>
+			密码前后不一致
+		</div>
+	</form>
+	<script src='../../bower_components/angular/angular.js'></script>
+	<script src='directive.js'></script>
+</body>
+</html>
