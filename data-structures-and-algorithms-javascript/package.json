@@ -1,0 +1,21 @@
+{
+  "name": "data_structures_algorithms_with_javascript",
+  "version": "1.0.0",
+  "description": "data structures algorithms javacript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "data",
+    "structures",
+    "algorithms"
+  ],
+  "author": "ransixi",
+  "license": "ISC",
+  "devDependencies": {
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.15",
+    "karma-jasmine": "^0.3.6"
+  }
+}
