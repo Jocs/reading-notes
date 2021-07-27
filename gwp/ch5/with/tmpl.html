@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>The dot is {{ . }}</div>
+  {{ with "ransixi"}}
+  <div>The inner dot is {{ . }}</div>
+  {{ end }}
+  <div>The outer dot is {{ . }}</div>
+  <!-- 管道 -->
+  <div>{{12.3456 | printf "%.2f"}}</div>
+  <!-- 函数 -->
+  <div>The reverse string is {{ . | reverse }}</div>
+</body>
+</html>
