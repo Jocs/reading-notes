@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>平行四边形</title>
+	<style>
+		div {
+			width: 200px;
+			height: 200px;
+			position: relative;
+			padding: 20px;
+			padding-left: 46px;
+			box-sizing: border-box;
+			margin-left: 100px;
+		}
+		div:before {
+			content: '';
+			position: absolute;
+			top: 0; bottom: 0;right: 0;left: 0;
+			transform: skew(-20deg);
+			background: #58a;
+			z-index: -1;
+		}
+	</style>
+</head>
+<body>
+	<div>从淘宝后台下载历史订单文件后，请只修改文件名称后上传，切勿打开文件和保存文件</div>
+</body>
+</html>

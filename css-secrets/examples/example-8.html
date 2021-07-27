@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>图片边框</title>
+	<style>
+		div {
+			box-sizing: border-box;
+			width: 800px;
+			height: 600px;
+			background: linear-gradient(white, white),
+				url("../images/example-8.jpeg");
+			background-origin: border-box;
+			background-size: cover;
+			border: 50px solid transparent;
+			background-clip: content-box, border-box;
+		}
+
+	</style>
+</head>
+<body>
+	<div></div>
+</body>
+</html>
