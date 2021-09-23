@@ -1,6 +1,7 @@
 # Prerequisites
 *.d
 .DT_Store
+.vscode
 
 # Object files
 *.o
