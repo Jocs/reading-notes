@@ -11,6 +11,7 @@ int main(void) {
   int i = 0;
 
   printf("Enter %d words beginning with q:\n", LIM);
+
   while (i < LIM && s_gets(temp, SIZE)) {
     if (temp[0] != 'q') {
       printf("%s does not begin width q!\n", temp);
