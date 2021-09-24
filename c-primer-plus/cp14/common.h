@@ -1,0 +1,1 @@
+char *s_get(char *st, int n);
