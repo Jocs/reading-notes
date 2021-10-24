@@ -1,0 +1,4 @@
+hello worldbefore fork
+pid: 4475, globval: 7, val: 88
+before fork
+pid: 4476, globval: 8, val: 89
