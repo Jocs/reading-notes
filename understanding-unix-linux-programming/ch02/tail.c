@@ -6,8 +6,6 @@
 #define LINE_LEN 10
 #define BUFFER_LEN 2048
 
-// TODO rewrite, it has bugs now.
-
 off_t get_pos(char* filename, int lines);
 
 int main(int argc, char** argv) {
@@ -53,7 +51,6 @@ off_t get_pos(char* filename, int lines) {
   }
 
   pos = lseek(fd, 0, SEEK_END);
-  printf("postion end: %d\n", pos);
 
   while (pos > 0 && line_end_count < lines) {
     int i;
@@ -63,27 +60,27 @@ off_t get_pos(char* filename, int lines) {
       pos = -1;
       break;
     }
+
     for (i = 0; i < BUFFER_LEN; i++) {
+      if (buf[i] == '\0') {
+        break;
+      }
       if (buf[i] == '\n') {
         line_end_count++;
       }
     }
   }
-  printf("postion: %d\n", pos);
-  printf("line end count: %d\n", line_end_count);
+
   lseek(fd, pos, SEEK_SET);
 
-  if (line_end_count > lines) {
-    while (line_end_count > lines && (read(fd, &ch, 1)) > 0) {
+  if (line_end_count >= lines) {
+    while (line_end_count >= lines && (read(fd, &ch, 1)) > 0) {
       if (ch == '\n') {
         line_end_count--;
       }
     }
     pos = lseek(fd, 0, SEEK_CUR);
   }
-
-  printf("postion: %d\n", pos);
-  printf("line end count: %d\n", line_end_count);
 
   close(fd);
 
