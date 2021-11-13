@@ -93,6 +93,7 @@ void do_copy(char* source, char* dist) {
     err_handler(source);
   }
 
+  // 重设访问时间和修改时间
   utbuf.actime = st.st_atimespec.tv_sec;
   utbuf.modtime = st.st_mtimespec.tv_sec;
   utime(dist_filename, &utbuf);
