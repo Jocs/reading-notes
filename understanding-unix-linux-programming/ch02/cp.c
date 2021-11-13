@@ -2,8 +2,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <string.h>
 
 #define BUFFER_SIZE 20
+#define FILENAME_LEN 256
 #define COPYMODE 0644
 
 void err_handler(char* filename);
@@ -17,11 +20,24 @@ int main(int argc, char** argv) {
   int out_fd;
   int count;
   int buf[BUFFER_SIZE];
+  char dist_filename[FILENAME_LEN];
+  struct stat st;
 
   if ((in_fd = open(argv[1], O_RDONLY)) == -1) {
     err_handler(argv[1]);
   }
-  if ((out_fd = creat(argv[2], COPYMODE)) == -1) {
+
+  if (stat(argv[2], &st) == -1) {
+    // err_handler(argv[2]);
+  }
+
+  strcpy(dist_filename, argv[2]);
+  if (S_ISDIR(st.st_mode)) {
+    strcat(dist_filename, "/");
+    strcat(dist_filename, strstr(argv[1], "/") ? strstr(argv[1], "/") + 1 : argv[1]);
+  }
+
+  if ((out_fd = creat(dist_filename, COPYMODE)) == -1) {
     err_handler(argv[2]);
   }
 
