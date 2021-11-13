@@ -5,6 +5,10 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/time.h>
+#include <time.h>
+#include <sys/types.h>
+#include <utime.h>
 
 #define BUFFER_SIZE 20
 #define FILENAME_LEN 256
@@ -41,8 +45,7 @@ int main(int argc, char** argv) {
     }
     closedir(dir);
   } else {
-
-    do_copy(source_filename, argv[2]);
+    do_copy(argv[1], argv[2]);
   }
 
   exit(EXIT_SUCCESS);
@@ -55,6 +58,7 @@ void do_copy(char* source, char* dist) {
   int buf[BUFFER_SIZE];
   int dist_filename[FILENAME_LEN];
   struct stat st;
+  struct utimbuf utbuf;
 
   if ((in_fd = open(source, O_RDONLY)) == -1) {
     err_handler(source);
@@ -84,6 +88,14 @@ void do_copy(char* source, char* dist) {
   if (close(in_fd) == -1 || close(out_fd) == -1) {
     err_handler(source);
   }
+
+  if (stat(source, &st) == -1) {
+    err_handler(source);
+  }
+
+  utbuf.actime = st.st_atimespec.tv_sec;
+  utbuf.modtime = st.st_mtimespec.tv_sec;
+  utime(dist_filename, &utbuf);
 }
 
 void err_handler(char* filename) {
