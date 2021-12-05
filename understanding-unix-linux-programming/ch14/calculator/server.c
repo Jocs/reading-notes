@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include "common.h"
+#include "cJSON.h"
 
 pthread_t t;
 pthread_attr_t attr;
@@ -138,12 +139,13 @@ void handle_get(char* path, int fd) {
 void handle_post(char* path, char* data, int fd) {
   char expr[BUFSIZ];
   char cmd[BUFSIZ];
-  int c;
-  char* i = strstr(data, ":\"");
-  char* j = strstr(data, "\"}");
-  strncpy(expr, i + 2, j - i - 2);
+  char buf[BUFSIZ];
 
-  printf("exp: %s\n", expr);
+  cJSON* body = cJSON_Parse(data);
+  cJSON* value = cJSON_GetObjectItemCaseSensitive(body, "value");
+  if (cJSON_IsString(value) && (value->valuestring != NULL)) {
+    strcpy(expr, value->valuestring);
+  }
 
   strcpy(cmd, "echo \"");
   strcat(cmd, expr);
@@ -152,12 +154,18 @@ void handle_post(char* path, char* data, int fd) {
 
   FILE* cmd_fp = popen(cmd, "r");
   FILE* sock_fp = write_response(fd, 200, "OK", "application/json");
-  fprintf(sock_fp, "{\"value\":\"");
-  while ((c = getc(cmd_fp)) != EOF) {
-    if (c != '\n')
-      putc(c, sock_fp);
+
+  while (fgets(buf, BUFSIZ, cmd_fp) != NULL) {
+    char* index = strchr(buf, '\n');
+    *index = '\0';
   }
-  fprintf(sock_fp, "\"}");
+
+  cJSON* res = cJSON_CreateObject();
+  cJSON* res_value = cJSON_CreateString(buf);
+
+  cJSON_AddItemToObject(res, "value", res_value);
+  fprintf(sock_fp, "%s", cJSON_Print(res));
+
   pclose(cmd_fp);
   fclose(sock_fp);
 }
