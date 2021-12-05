@@ -1,0 +1,41 @@
+h1 {
+  font-size: 40px;
+  color: rgba(0, 0, 0, .7);
+  margin: 40px auto 0 auto;
+  text-align: center;
+}
+.form-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input {
+  width: 400px;
+  height: 50px;
+  outline: none;
+  border: 1px solid rgba(0, 0, 0, .7);
+  border-radius: 5px;
+  margin-right: 10px;
+  font-size: 20px;
+  padding: 0 8px;
+}
+
+.button {
+  width: 80px;
+  height: 50px;
+  background: orangered;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 20px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.result {
+  font-size: 20px;
+  text-align: center;
+  margin-top: 40px;
+}
