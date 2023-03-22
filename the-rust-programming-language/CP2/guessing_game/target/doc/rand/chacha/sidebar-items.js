@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ChaChaRng","A random number generator that uses the ChaCha20 algorithm [1]."]]};
