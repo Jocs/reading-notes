@@ -5,18 +5,22 @@ use crate::Row;
 #[derive(Default)]
 pub struct Document {
     rows: Vec<Row>,
+    pub file_name: Option<String>,
 }
 
 impl Document {
-    pub fn open(filename: &str) -> Self {
+    pub fn open(filename: &str) -> Result<Self, std::io::Error> {
         let mut rows = Vec::new();
-        let content = fs::read_to_string(filename).unwrap();
+        let content = fs::read_to_string(filename)?;
 
         for line in content.lines() {
             rows.push(Row::from(line));
         }
 
-        Self { rows }
+        Ok(Self {
+            rows,
+            file_name: Some(filename.to_string()),
+        })
     }
 
     pub fn row(&self, row_index: usize) -> Option<&Row> {
