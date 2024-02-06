@@ -1,6 +1,8 @@
 use std::fs;
 
+use crate::row;
 use crate::Row;
+use crate::Position;
 
 #[derive(Default)]
 pub struct Document {
@@ -33,5 +35,66 @@ impl Document {
 
     pub fn is_empty(&self) -> bool {
         self.rows.is_empty()
+    }
+
+    pub fn insert(&mut self, at: &Position, c: char) {
+        let len = self.len();
+        let &Position { x, y } = at;
+
+        if c == '\n' {
+            self.break_line(at);
+            return;
+        }
+
+        if y >= len {
+            // handle add new row.
+            let content = c.to_string();
+            let new_row = Row::from(content.as_str());
+            self.rows.push(new_row);
+        } else {
+            // 通过 get_mut 获取可变修改
+            if let Some(row) = self.rows.get_mut(y) {
+                row.insert(x, c);
+            };
+        }
+    }
+
+    pub fn break_line(&mut self, at: &Position) {
+        let len = self.len();
+        let &Position { x, y } = at;
+        if y > len {
+            return;
+        }
+
+        if y == len {
+            self.rows.push(Row::default());
+            return;
+        }
+
+        if let Some(row) = self.rows.get_mut(y) {
+            let new_row = row.split(x);
+            self.rows.insert(y + 1, new_row);
+        }
+    }
+
+    // delete 光标位置不变，
+    pub fn delete(&mut self, at: &Position) {
+        let len = self.len();
+        let &Position { x, y } = at;
+
+        if y >= len {
+            return;
+        }
+
+        if x == self.rows.get_mut(y).unwrap().len() && y < self.len() - 1 {
+            let next_row = self.rows.remove(y + 1);
+            if let Some(row) = self.rows.get_mut(y) {
+                row.append(&next_row);
+            }
+        } else {
+            if let Some(row) = self.rows.get_mut(y) {
+                row.delete(x);
+            }
+        }
     }
 }
