@@ -91,6 +91,20 @@ impl Editor {
 
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
+            Key::Char(c) => {
+                self.document.insert(&self.cursor_position, c);
+                self.move_cursor(Key::Right);
+            },
+            Key::Delete => {
+                // Delete no need to move cursor.
+                self.document.delete(&self.cursor_position);
+            },
+            Key::Backspace => {
+                if self.cursor_position.x > 0 || self.cursor_position.y > 0 {
+                    self.move_cursor(Key::Left);
+                    self.document.delete(&self.cursor_position);
+                }
+            },
             Key::Up
             | Key::Down
             | Key::Left
@@ -235,14 +249,16 @@ impl Editor {
         match key {
             Key::Left => {
                 if x > 0 {
-                    x = x.saturating_sub(1);
+                    x -= 1;
                 } else if y > 0 {
                     y = y - 1;
                     width = if let Some(row) = self.document.row(y) {
+                        // row.len 是私有属性，不能直接访问
                         row.len()
                     } else {
                         0
                     };
+                    // 将光标移动到上一行行尾，并且等于 row.len()
                     x = width;
                 }
             },
