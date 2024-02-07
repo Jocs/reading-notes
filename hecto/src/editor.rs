@@ -91,6 +91,13 @@ impl Editor {
 
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
+            Key::Ctrl('s') => {
+                if self.document.save().is_ok() {
+                    self.status_message = StatusMessage::from(format!("File saved successfully"));
+                } else {
+                    self.status_message = StatusMessage::from("File save failed".to_string());
+                }
+            }
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);

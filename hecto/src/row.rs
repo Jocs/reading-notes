@@ -99,6 +99,10 @@ impl Row {
         self.len == 0
     }
 
+    pub fn as_bytes(&self) -> &[u8] {
+        self.string.as_bytes()
+    }
+
     fn update_len(&mut self) {
         self.len = self.string[..].graphemes(true).count()
     }
