@@ -91,13 +91,7 @@ impl Editor {
 
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
-            Key::Ctrl('s') => {
-                if self.document.save().is_ok() {
-                    self.status_message = StatusMessage::from(format!("File saved successfully"));
-                } else {
-                    self.status_message = StatusMessage::from("File save failed".to_string());
-                }
-            }
+            Key::Ctrl('s') => self.save(),
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);
@@ -126,6 +120,62 @@ impl Editor {
         self.scroll();
 
         Ok(())
+    }
+
+    // save and save as.
+    fn save(&mut self) {
+        // 如果文件名不存在，提示用户输入文件名，然后保存
+        if self.document.file_name.is_none() {
+            let new_name = self.prompt("Save as: ").unwrap_or(None);
+            if new_name.is_none() {
+                self.status_message = StatusMessage::from("Save abort".to_string());
+                return;
+            }
+
+            self.document.file_name = new_name;
+        }
+
+        if self.document.save().is_ok() {
+            self.status_message = StatusMessage::from(format!("File saved successfully"));
+        } else {
+            self.status_message = StatusMessage::from("File save failed".to_string());
+        }
+    }
+
+    fn prompt(&mut self, prompt: &str) -> Result<Option<String>, std::io::Error> {
+        let mut result = String::new();
+
+        loop {
+            self.status_message = StatusMessage::from(format!("{}{}", prompt, result));
+            self.refresh_screen()?;
+
+            match Terminal::read_key()? {
+                Key::Backspace => {
+                    if result.len() > 0 {
+                        result.truncate(result.len() - 1);
+                    }
+                },
+                Key::Char('\n') => break,
+                Key::Char(c) => {
+                    if !c.is_control() {
+                        result.push(c);
+                    }
+                },
+                Key::Esc => {
+                    result.truncate(0);
+                    break;
+                },
+                _ => (),
+            }  
+        }
+
+        self.status_message = StatusMessage::from(String::new());
+
+        if result.is_empty() {
+            return Ok(None);
+        }
+
+        Ok(Some(result))
     }
 
     fn scroll(&mut self) {
