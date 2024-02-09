@@ -8,15 +8,15 @@
     clippy::else_if_without_else
 )]
 use std::env;
+use std::io::{self, Error, Write};
 use std::time::Duration;
 use std::time::Instant;
-use std::io::{self, Write};
-use termion::event::Key;
 use termion::color;
+use termion::event::Key;
 
-use crate::Terminal;
 use crate::Document;
 use crate::Row;
+use crate::Terminal;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const STATUS_BG_COLOR: color::Rgb = color::Rgb(239, 239, 239);
@@ -102,27 +102,47 @@ impl Editor {
         match pressed_key {
             Key::Ctrl('q') => {
                 if self.quit_times > 0 && self.document.is_dirty() {
-                    self.status_message = StatusMessage::from(format!("WARNING: file has unsaved changes. Please Ctrl-Q {} more times qu quit.", self.quit_times));
+                    self.status_message = StatusMessage::from(format!(
+                        "WARNING: file has unsaved changes. Please Ctrl-Q {} more times qu quit.",
+                        self.quit_times
+                    ));
                     self.quit_times -= 1;
                     return Ok(());
                 }
                 self.should_quit = true;
-            },
+            }
             Key::Ctrl('s') => self.save(),
+            Key::Ctrl('f') => {
+                if let Some(query) = self
+                    .prompt("Search: ", |editor, _, query| {
+                        if let Some(position) = editor.document.find(query) {
+                            editor.cursor_position = position;
+                            editor.scroll();
+                        }
+                    })
+                    .unwrap_or(None)
+                {
+                    if let Some(position) = self.document.find(&query) {
+                        self.cursor_position = position;
+                    } else {
+                        self.status_message = StatusMessage::from(format!("Not found : {query}"));
+                    }
+                }
+            }
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);
-            },
+            }
             Key::Delete => {
                 // Delete no need to move cursor.
                 self.document.delete(&self.cursor_position);
-            },
+            }
             Key::Backspace => {
                 if self.cursor_position.x > 0 || self.cursor_position.y > 0 {
                     self.move_cursor(Key::Left);
                     self.document.delete(&self.cursor_position);
                 }
-            },
+            }
             Key::Up
             | Key::Down
             | Key::Left
@@ -148,7 +168,7 @@ impl Editor {
     fn save(&mut self) {
         // 如果文件名不存在，提示用户输入文件名，然后保存
         if self.document.file_name.is_none() {
-            let new_name = self.prompt("Save as: ").unwrap_or(None);
+            let new_name = self.prompt("Save as: ", |_, _, _| {}).unwrap_or(None);
             if new_name.is_none() {
                 self.status_message = StatusMessage::from("Save abort".to_string());
                 return;
@@ -164,27 +184,33 @@ impl Editor {
         }
     }
 
-    fn prompt(&mut self, prompt: &str) -> Result<Option<String>, std::io::Error> {
+    // callback 支持默认值吗？或者函数参数支持默认值吗？
+    fn prompt<C>(&mut self, prompt: &str, callback: C) -> Result<Option<String>, Error>
+    where
+        C: Fn(&mut Self, Key, &String),
+    {
         let mut result = String::new();
 
         loop {
             self.status_message = StatusMessage::from(format!("{prompt}{result}"));
             self.refresh_screen()?;
 
-            match Terminal::read_key()? {
+            let key = Terminal::read_key()?;
+            match key {
                 Key::Backspace => result.truncate(result.len().saturating_sub(1)),
                 Key::Char('\n') => break,
                 Key::Char(c) => {
                     if !c.is_control() {
                         result.push(c);
                     }
-                },
+                }
                 Key::Esc => {
                     result.truncate(0);
                     break;
-                },
+                }
                 _ => (),
-            }  
+            }
+            callback(self, key, &result);
         }
 
         self.status_message = StatusMessage::from(String::new());
@@ -274,7 +300,12 @@ impl Editor {
             file_name.truncate(20);
         }
 
-        status = format!("{} - {} lines{}", file_name, self.document.len(), modified_indicator);
+        status = format!(
+            "{} - {} lines{}",
+            file_name,
+            self.document.len(),
+            modified_indicator
+        );
 
         let line_indicator = format!("{}/{}", self.cursor_position.y + 1, self.document.len());
 
@@ -342,7 +373,7 @@ impl Editor {
                     // 将光标移动到上一行行尾，并且等于 row.len()
                     x = width;
                 }
-            },
+            }
 
             Key::Right => {
                 if x < width {
@@ -371,7 +402,7 @@ impl Editor {
                 } else {
                     0
                 };
-            },
+            }
 
             Key::PageDown => {
                 y = if y.saturating_add(terminal_height) < height {
@@ -379,7 +410,7 @@ impl Editor {
                 } else {
                     height
                 }
-            },
+            }
             _ => (),
         }
 

@@ -130,4 +130,19 @@ impl Row {
     fn update_len(&mut self) {
         self.len = self.string[..].graphemes(true).count()
     }
+
+    pub fn find(&self, query: &str) -> Option<usize> {
+        let matching_byte_index = self.string.find(query);
+        if let Some(match_byte_index) = matching_byte_index {
+            for (grapheme_index, (byte_index, _)) in
+                self.string[..].grapheme_indices(true).enumerate()
+            {
+                if match_byte_index == byte_index {
+                    return Some(grapheme_index);
+                }
+            }
+        }
+
+        None
+    }
 }
