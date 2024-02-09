@@ -17,7 +17,9 @@ impl Document {
         let content = fs::read_to_string(filename)?;
 
         for line in content.lines() {
-            rows.push(Row::from(line));
+            let mut row = Row::from(line);
+            row.highlight();
+            rows.push(row);
         }
 
         Ok(Self {
@@ -40,27 +42,33 @@ impl Document {
     }
 
     pub fn insert(&mut self, at: &Position, c: char) {
-        let len = self.len();
+        let len = self.rows.len();
         let &Position { x, y } = at;
+
+        if y > len {
+            return;
+        }
+
+                // TODO: 有没有必要分别放到上面大括号呢？
+                self.dirty = true;
 
         if c == '\n' {
             self.insert_newline(at);
             return;
         }
 
-        if y >= len {
+        if y == len {
             // handle add new row.
-            let content = c.to_string();
-            let new_row = Row::from(content.as_str());
-            self.rows.push(new_row);
+            let mut row = Row::default();
+            row.insert(0, c);
+            row.highlight();
+            self.rows.push(row);
         } else {
             // 通过 get_mut 获取可变修改
-            if let Some(row) = self.rows.get_mut(y) {
-                row.insert(x, c);
-            };
+            let row = &mut self.rows[at.y];
+            row.insert(x, c);
+            row.highlight();
         }
-        // TODO: 有没有必要分别放到上面大括号呢？
-        self.dirty = true;
     }
 
     pub fn insert_newline(&mut self, at: &Position) {
@@ -77,10 +85,12 @@ impl Document {
             return;
         }
 
-        if let Some(row) = self.rows.get_mut(y) {
-            let new_row = row.split(x);
-            self.rows.insert(y + 1, new_row);
-        }
+        let current_row = &mut self.rows[at.y];
+        let mut new_row = current_row.split(at.x);
+        current_row.highlight();
+        new_row.highlight();
+
+        self.rows.insert(y + 1, new_row);
     }
 
     // delete 光标位置不变
@@ -96,10 +106,12 @@ impl Document {
             let next_row = self.rows.remove(y + 1);
             if let Some(row) = self.rows.get_mut(y) {
                 row.append(&next_row);
+                row.highlight();
             }
         } else {
             if let Some(row) = self.rows.get_mut(y) {
                 row.delete(x);
+                row.highlight();
             }
         }
 
