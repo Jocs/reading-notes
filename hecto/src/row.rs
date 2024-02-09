@@ -8,14 +8,11 @@ pub struct Row {
 }
 
 impl From<&str> for Row {
-    fn from(string: &str) -> Self {
-        let mut row = Self {
-            string: string.to_string(),
-            len: 0,
-        };
-
-        row.update_len();
-        row
+    fn from(slice: &str) -> Self {
+        Self {
+            string: slice.to_string(),
+            len: slice.graphemes(true).count(),
+        }
     }
 }
 
@@ -32,7 +29,7 @@ impl Row {
             .take(end - start)
         {
             if grapheme == "\t" {
-                result.push_str(" ");
+                result.push(' ');
                 continue;
             }
 
@@ -43,36 +40,48 @@ impl Row {
     }
 
     pub fn insert(&mut self, at: usize, c: char) {
+        // 如果光标已经在行尾，直接在行尾插入字符
         if at >= self.len {
             self.string.push(c);
-        } else {
-            let mut result: String = self.string[..].graphemes(true).take(at).collect();
-            let remain: String = self.string[..].graphemes(true).skip(at).collect();
+            self.len += 1;
 
-            result.push(c);
-
-            result.push_str(&remain);
-
-            self.string = result;
+            return;
         }
 
-        self.update_len();
+        let mut result = String::new();
+        let mut length = 0;
+
+        for (index, grapheme) in self.string[..].graphemes(true).enumerate() {
+            length += 1;
+            if index == at {
+                length += 1;
+                result.push(c);
+            }
+            result.push_str(grapheme);
+        }
+
+        self.len = length;
+        self.string = result;
     }
 
+    // 删除指定位置上的字符
     pub fn delete(&mut self, at: usize) {
         if at >= self.len {
             return;
         }
 
-        let mut result: String = self.string[..].graphemes(true).take(at).collect();
-        let remain: String = self.string[..].graphemes(true).skip(at + 1).collect();
+        let mut result = String::new();
+        let mut length = 0;
 
-        if remain.len() > 0 {
-            result.push_str(&remain);
+        for (index, grapheme) in self.string[..].graphemes(true).enumerate() {
+            if index != at {
+                result.push_str(grapheme);
+                length += 1;
+            }
         }
 
         self.string = result;
-        self.update_len();
+        self.len = length;
     }
 
     pub fn append(&mut self, other: &Self) {
@@ -82,13 +91,28 @@ impl Row {
     }
 
     pub fn split(&mut self, at: usize) -> Self {
-        let result: String = self.string[..].graphemes(true).take(at).collect();
-        let remain: String = self.string[..].graphemes(true).skip(at + 1).collect();
+        let mut row = String::new();
+        let mut length = 0;
+        let mut new_row = String::new();
+        let mut new_length = 0;
 
-        self.string = result;
-        self.update_len();
+        for (index, grapheme) in self.string[..].graphemes(true).enumerate() {
+            if index < at {
+                row.push_str(grapheme);
+                length += 1;
+            } else {
+                new_row.push_str(grapheme);
+                new_length += 1;
+            }
+        }
 
-        Self::from(remain.as_str())
+        self.string = row;
+        self.len = length;
+
+        Self {
+            string: new_row,
+            len: new_length,
+        }
     }
 
     pub fn len(&self) -> usize {

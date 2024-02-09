@@ -1,4 +1,12 @@
-#![warn(clippy::all, clippy::pedantic)]
+#![warn(clippy::all, clippy::pedantic, clippy::restriction)]
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::implicit_return,
+    clippy::shadow_reuse,
+    clippy::print_stdout,
+    clippy::wildcard_enum_match_arm,
+    clippy::else_if_without_else
+)]
 use std::env;
 use std::time::Duration;
 use std::time::Instant;
@@ -13,6 +21,7 @@ use crate::Row;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const STATUS_BG_COLOR: color::Rgb = color::Rgb(239, 239, 239);
 const STATUS_FG_COLOR: color::Rgb = color::Rgb(30, 30, 30);
+const QUIT_TIMES: u8 = 3;
 
 struct StatusMessage {
     text: String,
@@ -41,19 +50,19 @@ pub struct Editor {
     document: Document,
     offsets: Position,
     status_message: StatusMessage,
+    quit_times: u8,
 }
 
 impl Editor {
     pub fn new() -> Self {
         let args: Vec<String> = env::args().collect();
-        let mut initial_status = "HELP: Ctrl-Q = quit".to_string();
-        let document = if args.len() > 1 {
-            let file_name = &args[1];
+        let mut initial_status = "HELP: Ctrl-F = find | Ctrl-S = save | Ctrl-Q = quit".to_string();
+        let document = if let Some(file_name) = args.get(1) {
             let doc = Document::open(&file_name);
-            if doc.is_ok() {
-                doc.unwrap()
+            if let Ok(doc) = doc {
+                doc
             } else {
-                initial_status = format!("Error: Could not open file {}", file_name);
+                initial_status = format!("Error: Could not open file {file_name}");
                 Document::default()
             }
         } else {
@@ -67,6 +76,7 @@ impl Editor {
             document,
             offsets: Position::default(),
             status_message: StatusMessage::from(initial_status),
+            quit_times: QUIT_TIMES,
         }
     }
 
@@ -90,7 +100,14 @@ impl Editor {
         let pressed_key = Terminal::read_key()?;
 
         match pressed_key {
-            Key::Ctrl('q') => self.should_quit = true,
+            Key::Ctrl('q') => {
+                if self.quit_times > 0 && self.document.is_dirty() {
+                    self.status_message = StatusMessage::from(format!("WARNING: file has unsaved changes. Please Ctrl-Q {} more times qu quit.", self.quit_times));
+                    self.quit_times -= 1;
+                    return Ok(());
+                }
+                self.should_quit = true;
+            },
             Key::Ctrl('s') => self.save(),
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
@@ -119,6 +136,11 @@ impl Editor {
 
         self.scroll();
 
+        if self.quit_times < QUIT_TIMES {
+            self.quit_times = QUIT_TIMES;
+            self.status_message = StatusMessage::from(String::new());
+        }
+
         Ok(())
     }
 
@@ -146,15 +168,11 @@ impl Editor {
         let mut result = String::new();
 
         loop {
-            self.status_message = StatusMessage::from(format!("{}{}", prompt, result));
+            self.status_message = StatusMessage::from(format!("{prompt}{result}"));
             self.refresh_screen()?;
 
             match Terminal::read_key()? {
-                Key::Backspace => {
-                    if result.len() > 0 {
-                        result.truncate(result.len() - 1);
-                    }
-                },
+                Key::Backspace => result.truncate(result.len().saturating_sub(1)),
                 Key::Char('\n') => break,
                 Key::Char(c) => {
                     if !c.is_control() {
@@ -245,13 +263,18 @@ impl Editor {
         let mut status: String;
         let width = self.terminal.size().width as usize;
         let mut file_name = "[No Name]".to_string();
+        let modified_indicator = if self.document.is_dirty() {
+            " (modified)"
+        } else {
+            ""
+        };
 
         if let Some(name) = &self.document.file_name {
             file_name = name.clone();
             file_name.truncate(20);
         }
 
-        status = format!("{} - {} lines", file_name, self.document.len());
+        status = format!("{} - {} lines{}", file_name, self.document.len(), modified_indicator);
 
         let line_indicator = format!("{}/{}", self.cursor_position.y + 1, self.document.len());
 
@@ -261,7 +284,7 @@ impl Editor {
             status = format!("{}{}", status, " ".repeat(width - len));
         }
 
-        status = format!("{}{}", status, line_indicator);
+        status = format!("{status}{line_indicator}");
 
         Terminal::set_bg_color(STATUS_BG_COLOR);
         Terminal::set_fg_color(STATUS_FG_COLOR);
@@ -281,13 +304,14 @@ impl Editor {
     }
 
     fn draw_welcome_message(&self) {
-        let mut welcome_message = format!("Hecto editor -- version {}", VERSION);
+        let mut welcome_message = format!("Hecto editor -- version {VERSION}");
         let padding = (self.terminal.size().width - welcome_message.len() as u16) / 2;
         let spaces = " ".repeat(padding.saturating_sub(1) as usize);
-        welcome_message = format!("~{}{}", spaces, welcome_message);
+
+        welcome_message = format!("~{spaces}{welcome_message}");
         welcome_message.truncate(self.terminal.size().width as usize);
 
-        println!("{}\r", welcome_message);
+        println!("{welcome_message}\r");
     }
 
     // 根据 key 值来移动光标位置，包括 Key::Left, Key::Right, Key::Up, Key::Down, Key::Home, Key::End 等

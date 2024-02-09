@@ -6,8 +6,9 @@ use crate::Position;
 
 #[derive(Default)]
 pub struct Document {
-    rows: Vec<Row>,
     pub file_name: Option<String>,
+    rows: Vec<Row>,
+    dirty: bool,
 }
 
 impl Document {
@@ -22,6 +23,7 @@ impl Document {
         Ok(Self {
             rows,
             file_name: Some(filename.to_string()),
+            dirty: false,
         })
     }
 
@@ -42,7 +44,7 @@ impl Document {
         let &Position { x, y } = at;
 
         if c == '\n' {
-            self.break_line(at);
+            self.insert_newline(at);
             return;
         }
 
@@ -57,14 +59,18 @@ impl Document {
                 row.insert(x, c);
             };
         }
+        // TODO: 有没有必要分别放到上面大括号呢？
+        self.dirty = true;
     }
 
-    pub fn break_line(&mut self, at: &Position) {
+    pub fn insert_newline(&mut self, at: &Position) {
         let len = self.len();
         let &Position { x, y } = at;
         if y > len {
             return;
         }
+
+        self.dirty = true;
 
         if y == len {
             self.rows.push(Row::default());
@@ -77,7 +83,7 @@ impl Document {
         }
     }
 
-    // delete 光标位置不变，
+    // delete 光标位置不变
     pub fn delete(&mut self, at: &Position) {
         let len = self.len();
         let &Position { x, y } = at;
@@ -86,7 +92,7 @@ impl Document {
             return;
         }
 
-        if x == self.rows.get_mut(y).unwrap().len() && y < self.len() - 1 {
+        if x == self.rows.get_mut(y).unwrap().len() && y + 1 < len {
             let next_row = self.rows.remove(y + 1);
             if let Some(row) = self.rows.get_mut(y) {
                 row.append(&next_row);
@@ -96,10 +102,12 @@ impl Document {
                 row.delete(x);
             }
         }
+
+        self.dirty = true;
     }
 
     // 保存文件 save to disk.
-    pub fn save(&self) -> Result<(), Error> {
+    pub fn save(&mut self) -> Result<(), Error> {
         if let Some(file_name) = &self.file_name {
             let mut file = fs::File::create(file_name)?;
 
@@ -107,8 +115,14 @@ impl Document {
                 file.write_all(row.as_bytes())?;
                 file.write_all(b"\n")?;
             }
+
+            self.dirty = true;
         }
 
         Ok(())
+    }
+
+    pub fn is_dirty(&self) -> bool {
+        self.dirty
     }
 }
