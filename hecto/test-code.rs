@@ -2,12 +2,11 @@ use std::cmp;
 use termion::color;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{highlighting, SearchDirection};
+use crate::SearchDirection;
 
 #[derive(Default)]
 pub struct Row {
     pub string: String,
-    highlighting: Vec<highlighting::Type>,
     len: usize,
 }
 
@@ -15,7 +14,6 @@ impl From<&str> for Row {
     fn from(slice: &str) -> Self {
         Self {
             string: slice.to_string(),
-            highlighting: Vec::new(),
             len: slice.graphemes(true).count(),
         }
     }
@@ -28,29 +26,26 @@ impl Row {
         let start = cmp::min(start, end);
 
         let mut result = String::new();
-        for (index, grapheme) in self.string[..]
+        for grapheme in self.string[..]
             .graphemes(true)
-            .enumerate()
             .skip(start)
             .take(end - start)
         {
             if let Some(c) = grapheme.chars().next() {
-                let highlighting_type = self
-                    .highlighting
-                    .get(index)
-                    .unwrap_or(&highlighting::Type::None);
-
-                let start_highlight = format!("{}", color::Fg(highlighting_type.to_color()));
-                result.push_str(&start_highlight[..]);
-
                 if c == '\t' {
                     result.push(' ');
+                } else if c.is_ascii_digit() {
+                    result.push_str(
+                        &format!(
+                            "{}{}{}",
+                            color::Fg(color::Rgb(220, 163, 163)),
+                            c,
+                            color::Fg(color::Reset)
+                        )[..],
+                    );
                 } else {
                     result.push(c);
                 }
-
-                let end_highlight = format!("{}", color::Fg(color::Reset));
-                result.push_str(&end_highlight[..]);
             }
         }
 
@@ -129,7 +124,6 @@ impl Row {
 
         Self {
             string: new_row,
-            highlighting: Vec::new(),
             len: new_length,
         }
     }
@@ -189,18 +183,5 @@ impl Row {
         }
 
         None
-    }
-
-    pub fn highlight(&mut self) {
-        let mut highlighting = Vec::new();
-        for c in self.string.chars() {
-            if c.is_ascii_digit() {
-                highlighting.push(highlighting::Type::Number);
-            } else {
-                highlighting.push(highlighting::Type::None);
-            }
-        }
-
-        self.highlighting = highlighting;
     }
 }
