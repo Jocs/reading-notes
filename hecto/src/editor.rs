@@ -168,7 +168,7 @@ impl Editor {
                             direction = SearchDirection::Forward;
                             editor.move_cursor(Key::Right);
                             moved = true;
-                        },
+                        }
                         Key::Left | Key::Up => {
                             direction = SearchDirection::Backward;
                             editor.move_cursor(Key::Left);
@@ -176,7 +176,11 @@ impl Editor {
                         }
                         _ => direction = SearchDirection::Forward,
                     }
-                    if let Some(position) = editor.document.find(&query, &editor.cursor_position, direction) {
+                    if let Some(position) =
+                        editor
+                            .document
+                            .find(&query, &editor.cursor_position, direction)
+                    {
                         editor.cursor_position = position;
                         editor.scroll();
                     } else if moved {
@@ -337,7 +341,12 @@ impl Editor {
             modified_indicator
         );
 
-        let line_indicator = format!("{}/{}", self.cursor_position.y + 1, self.document.len());
+        let line_indicator = format!(
+            "{} | {}/{}",
+            self.document.file_type(),
+            self.cursor_position.y + 1,
+            self.document.len()
+        );
 
         let len = status.len() + line_indicator.len();
 
