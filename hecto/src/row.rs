@@ -198,10 +198,11 @@ impl Row {
 
     pub fn highlight(&mut self, word: Option<&str>) {
         let mut highlighting = Vec::new();
-        let chars: Vec<char> = self.string.chars().collect();
         let mut matches = Vec::new();
         let mut search_index = 0;
+        let chars: Vec<char> = self.string.chars().collect();
 
+        // 如果搜索的 query 存在，那么把所有匹配项都找到，并且将匹配 index 存在 matches。
         if let Some(word) = word {
             while let Some(search_match) = self.find(word, search_index, SearchDirection::Forward) {
                 matches.push(search_match);
@@ -214,6 +215,7 @@ impl Row {
             }
         }
 
+        let mut prev_is_separator = true;
         let mut index = 0;
 
         while let Some(c) = chars.get(index) {
@@ -227,11 +229,23 @@ impl Row {
                 }
             }
 
-            if c.is_ascii_digit() {
+            let previous_highlight = if index > 0 {
+                highlighting
+                    .get(index - 1)
+                    .unwrap_or(&highlighting::Type::None)
+            } else {
+                &highlighting::Type::None
+            };
+
+            if (c.is_ascii_digit()
+                && (prev_is_separator || previous_highlight == &highlighting::Type::Number))
+                || (c == &'.' && previous_highlight == &highlighting::Type::Number)
+            {
                 highlighting.push(highlighting::Type::Number);
             } else {
                 highlighting.push(highlighting::Type::None);
             }
+            prev_is_separator = c.is_ascii_punctuation() || c.is_ascii_whitespace();
             index += 1;
         }
 
