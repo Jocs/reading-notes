@@ -85,8 +85,8 @@ impl Document {
             return;
         }
 
-        let current_row = &mut self.rows[at.y];
-        let mut new_row = current_row.split(at.x);
+        let current_row = &mut self.rows[y];
+        let mut new_row = current_row.split(x);
         current_row.highlight();
         new_row.highlight();
 
