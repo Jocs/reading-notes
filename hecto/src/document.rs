@@ -18,7 +18,7 @@ impl Document {
 
         for line in content.lines() {
             let mut row = Row::from(line);
-            row.highlight();
+            row.highlight(None);
             rows.push(row);
         }
 
@@ -61,13 +61,13 @@ impl Document {
             // handle add new row.
             let mut row = Row::default();
             row.insert(0, c);
-            row.highlight();
+            row.highlight(None);
             self.rows.push(row);
         } else {
             // 通过 get_mut 获取可变修改
             let row = &mut self.rows[at.y];
             row.insert(x, c);
-            row.highlight();
+            row.highlight(None);
         }
     }
 
@@ -87,8 +87,8 @@ impl Document {
 
         let current_row = &mut self.rows[y];
         let mut new_row = current_row.split(x);
-        current_row.highlight();
-        new_row.highlight();
+        current_row.highlight(None);
+        new_row.highlight(None);
 
         self.rows.insert(y + 1, new_row);
     }
@@ -106,12 +106,12 @@ impl Document {
             let next_row = self.rows.remove(y + 1);
             if let Some(row) = self.rows.get_mut(y) {
                 row.append(&next_row);
-                row.highlight();
+                row.highlight(None);
             }
         } else {
             if let Some(row) = self.rows.get_mut(y) {
                 row.delete(x);
-                row.highlight();
+                row.highlight(None);
             }
         }
 
@@ -177,5 +177,11 @@ impl Document {
         }
 
         None
+    }
+
+    pub fn highlight(&mut self, word: Option<&str>) {
+        for row in &mut self.rows {
+            row.highlight(word);
+        }
     }
 }
