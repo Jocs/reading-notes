@@ -1,8 +1,8 @@
 use std::fs;
 use std::io::{Error, Write};
 
-use crate::{FileType, Row, SearchDirection};
 use crate::Position;
+use crate::{FileType, Row, SearchDirection};
 
 #[derive(Default)]
 pub struct Document {
@@ -19,9 +19,7 @@ impl Document {
         let file_type = FileType::from(filename);
 
         for line in content.lines() {
-            let mut row = Row::from(line);
-            row.highlight(file_type.highlighting_options(), None);
-            rows.push(row);
+            rows.push(Row::from(line));
         }
 
         Ok(Self {
@@ -52,25 +50,28 @@ impl Document {
             return;
         }
 
-                // TODO: 有没有必要分别放到上面大括号呢？
-                self.dirty = true;
+        self.dirty = true;
 
         if c == '\n' {
             self.insert_newline(at);
-            return;
-        }
-
-        if y == len {
+        } else if y == len {
             // handle add new row.
             let mut row = Row::default();
             row.insert(0, c);
-            row.highlight(self.file_type.highlighting_options(), None);
             self.rows.push(row);
         } else {
             // 通过 get_mut 获取可变修改
             let row = &mut self.rows[at.y];
             row.insert(x, c);
-            row.highlight(self.file_type.highlighting_options(), None);
+        }
+
+        self.unhighlight_rows(y);
+    }
+
+    fn unhighlight_rows(&mut self, start: usize) {
+        let start = start.saturating_sub(1);
+        for row in self.rows.iter_mut().skip(start) {
+            row.is_highlighted = false;
         }
     }
 
@@ -89,10 +90,7 @@ impl Document {
         }
 
         let current_row = &mut self.rows[y];
-        let mut new_row = current_row.split(x);
-        current_row.highlight(self.file_type.highlighting_options(), None);
-        new_row.highlight(self.file_type.highlighting_options(), None);
-
+        let new_row = current_row.split(x);
         self.rows.insert(y + 1, new_row);
     }
 
@@ -109,14 +107,14 @@ impl Document {
             let next_row = self.rows.remove(y + 1);
             if let Some(row) = self.rows.get_mut(y) {
                 row.append(&next_row);
-                row.highlight(self.file_type.highlighting_options(), None);
             }
         } else {
             if let Some(row) = self.rows.get_mut(y) {
                 row.delete(x);
-                row.highlight(self.file_type.highlighting_options(), None);
             }
         }
+
+        self.unhighlight_rows(at.y);
 
         self.dirty = true;
     }
@@ -130,7 +128,6 @@ impl Document {
             for row in &mut self.rows {
                 file.write_all(row.as_bytes())?;
                 file.write_all(b"\n")?;
-                row.highlight(self.file_type.highlighting_options(), None);
             }
 
             self.dirty = false;
@@ -184,9 +181,25 @@ impl Document {
         None
     }
 
-    pub fn highlight(&mut self, word: Option<&str>) {
-        for row in &mut self.rows {
-            row.highlight(self.file_type.highlighting_options(), word);
+    pub fn highlight(&mut self, word: &Option<String>, until: Option<usize>) {
+        let mut start_with_comment = false;
+
+        let until = if let Some(until) = until {
+            if until.saturating_add(1) < self.rows.len() {
+                until + 1
+            } else {
+                self.rows.len()
+            }
+        } else {
+            self.rows.len()
+        };
+
+        for row in &mut self.rows[..until] {
+            start_with_comment = row.highlight(
+                self.file_type.highlighting_options(),
+                word,
+                start_with_comment,
+            );
         }
     }
 
